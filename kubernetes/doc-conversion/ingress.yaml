@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: doc-conversion
+  namespace: doc-conversion
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: conversion.plantic.xyz
+    http:
+      paths:
+      - path: /convert
+        pathType: Prefix
+        backend:
+          service:
+            name: doc-conversion-service
+            port:
+              number: 80
+

@@ -1,0 +1,8 @@
+- name: Join worker nodes
+  hosts: workers
+  become: yes
+  tasks:
+    - name: join cluster
+      # SSH into master node and paste kubeadm token create --print-join-command
+      # Paste the output here
+      shell: "kubeadm join 34.230.9.147:6443 --token k9s41f.ijbzm7xaasj7l0f4 --discovery-token-ca-cert-hash sha256:694810004a23c946ac6870eb690e2cd01b4fdd23ce6adb390022bf827fddc455"

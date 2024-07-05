@@ -1,0 +1,43 @@
+- name: Setup kubeadm on master node
+  hosts: master
+  tasks:
+    - name: Find master node public ip
+      uri: 
+        url: http://ifconfig.me/ip
+        return_content: yes
+      register: ip_response
+
+    - name: Initialize Kubernetes cluster with kubeadm
+      become: yes
+      vars:
+        IPADDR: "{{ ip_response.content }}"
+        NODENAME: "{{ ansible_hostname }}"
+        POD_CIDR: "192.168.0.0/16"
+      ansible.builtin.command: |
+        sudo kubeadm init --control-plane-endpoint={{ IPADDR }} --apiserver-cert-extra-sans={{ IPADDR }} --pod-network-cidr={{ POD_CIDR }} --node-name {{ NODENAME }} --ignore-preflight-errors=Swap,NumCPU
+
+    - name: Setting up kubectl on Master Node
+      ansible.builtin.shell:
+        cmd: |
+          mkdir -p /home/ubuntu/.kube
+          sudo cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+          sudo chown ubuntu:ubuntu /home/ubuntu/.kube/config
+
+    - name: Download tigera-operator.yaml
+      shell: curl -o tigera-operator.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+
+    - name: Download custom-resources.yaml
+      shell: curl -o custom-resources.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+    
+    - name: Apply tigera-operator.yaml
+      shell: kubectl create -f tigera-operator.yaml --kubeconfig /home/ubuntu/.kube/config
+
+    - name: Apply custom-resources.yaml
+      shell: kubectl create -f custom-resources.yaml --kubeconfig /home/ubuntu/.kube/config
+
+    - name: Download Helm
+      shell:
+        cmd: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh

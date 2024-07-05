@@ -1,0 +1,104 @@
+- name: Upload k8s manifests
+  hosts: master
+  tasks:
+    - name: Create image upload namespace
+      shell: kubectl create namespace image-upload --kubeconfig /home/ubuntu/.kube/config
+      ignore_errors: yes
+
+    - name: Create doc conversion namespace
+      shell: kubectl create namespace doc-conversion --kubeconfig /home/ubuntu/.kube/config
+      ignore_errors: yes
+
+    - name: Create nginx-controller namespace
+      shell: kubectl create namespace nginx-controller --kubeconfig /home/ubuntu/.kube/config
+      ignore_errors: yes
+
+    - name: Deploy ingress nginx controller
+      shell:
+        cmd: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm install nginx-ingress ingress-nginx/ingress-nginx \
+          --namespace nginx-controller \
+          --set controller.service.type=NodePort --kubeconfig /home/ubuntu/.kube/config
+          kubectl delete -A ValidatingWebhookConfiguration nginx-ingress-ingress-nginx-admission
+      ignore_errors: yes
+
+    - name: Copy Image Upload deployment
+      ansible.builtin.copy:
+        src: ../kubernetes/image-upload-service/deployment.yaml
+        dest: /home/ubuntu/image-upload-deployment.yaml
+        mode: '0644'
+    
+    - name: Copy Image Upload service
+      ansible.builtin.copy:
+        src: ../kubernetes/image-upload-service/service.yaml
+        dest: /home/ubuntu/image-upload-service.yaml
+        mode: '0644'
+    
+    - name: Copy Image Upload ingress
+      ansible.builtin.copy:
+        src: ../kubernetes/image-upload-service/ingress.yaml
+        dest: /home/ubuntu/image-upload-ingress.yaml
+        mode: '0644'
+
+    - name: Copy Image Upload HPA
+      ansible.builtin.copy:
+        src: ../kubernetes/image-upload-service/hpa.yaml
+        dest: /home/ubuntu/image-upload-hpa.yaml
+        mode: '0644'
+
+
+    - name: Copy Doc Conversion deployment
+      ansible.builtin.copy:
+        src: ../kubernetes/doc-conversion/deployment.yaml
+        dest: /home/ubuntu/doc-conversion-deployment.yaml
+        mode: '0644'
+    
+    - name: Copy Doc Conversion service
+      ansible.builtin.copy:
+        src: ../kubernetes/doc-conversion/service.yaml
+        dest: /home/ubuntu/doc-conversion-service.yaml
+        mode: '0644'
+    
+    - name: Copy Doc Conversion ingress
+      ansible.builtin.copy:
+        src: ../kubernetes/doc-conversion/ingress.yaml
+        dest: /home/ubuntu/doc-conversion-ingress.yaml
+        mode: '0644'
+
+    - name: Copy Doc Conversion HPA
+      ansible.builtin.copy:
+        src: ../kubernetes/doc-conversion/hpa.yaml
+        dest: /home/ubuntu/doc-conversion-hpa.yaml
+        mode: '0644'
+
+    - name: Copy metric server
+      ansible.builtin.copy:
+        src: ../kubernetes/metric-server.yaml
+        dest: /home/ubuntu/metric-server.yaml
+        mode: '0644'
+    
+
+    - name: Apply Microservice manifests
+      shell:
+        cmd: |
+          kubectl apply -f image-upload-deployment.yaml --kubeconfig /home/ubuntu/.kube/config
+          kubectl apply -f image-upload-service.yaml --kubeconfig /home/ubuntu/.kube/config
+          kubectl apply -f image-upload-ingress.yaml --kubeconfig /home/ubuntu/.kube/config
+
+          kubectl apply -f doc-conversion-deployment.yaml --kubeconfig /home/ubuntu/.kube/config
+          kubectl apply -f doc-conversion-service.yaml --kubeconfig /home/ubuntu/.kube/config
+          kubectl apply -f doc-conversion-ingress.yaml --kubeconfig /home/ubuntu/.kube/config
+    
+    - name: Install metrics server
+      shell:
+        cmd: |  
+          kubectl apply -f metric-server.yaml --kubeconfig /home/ubuntu/.kube/config
+          
+
+    - name: Install Horizontal Pod Autoscalers
+      shell:
+        cmd: |
+          kubectl apply -f image-upload-hpa.yaml --kubeconfig /home/ubuntu/.kube/config
+          kubectl apply -f doc-conversion-hpa.yaml --kubeconfig /home/ubuntu/.kube/config

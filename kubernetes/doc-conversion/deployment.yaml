@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doc-conversion-deployment
+  namespace: doc-conversion
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: doc-conversion
+  template:
+    metadata:
+      labels:
+        app: doc-conversion
+    spec:
+      containers:
+      - name: doc-conversion
+        image: fcojesusdiaz/plantic:doc-conversion
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+      
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            memory: "256Mi"
+

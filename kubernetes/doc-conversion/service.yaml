@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: doc-conversion-service
+  namespace: doc-conversion
+spec:
+  selector:
+    app: doc-conversion
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+

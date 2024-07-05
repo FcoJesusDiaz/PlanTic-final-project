@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-upload-deployment
+  namespace: image-upload
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: image-upload
+  template:
+    metadata:
+      labels:
+        app: image-upload
+    spec:
+      containers:
+      - name: image-upload
+        image: fcojesusdiaz/plantic:image-upload
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            memory: "256Mi"
+
