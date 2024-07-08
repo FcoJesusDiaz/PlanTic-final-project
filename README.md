@@ -48,6 +48,9 @@ The cluster architecture can be found in the following image:
 
 Kubelet and a container runtime (in this case CRI-O was installed) has to be configured in every node.
 
+![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/fbc7111f-12d0-4437-923e-72fb812628ba)
+
+
 ## Microservices overview
 ### Doc conversion microservice
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/90ba5407-81da-4cb1-afc8-6dd4c2c78cda)
