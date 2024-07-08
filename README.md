@@ -45,6 +45,7 @@ An S3 bucket has to be created and its name must be pasted in the correspoding e
 ## Cluster architecture
 The cluster architecture can be found in the following image:
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/3e0e9f35-107d-4f11-8c99-bb631664bab6)
+
 Kubelet and a container runtime (in this case CRI-O was installed) has to be configured in every node.
 
 ## Microservices overview
@@ -66,23 +67,28 @@ In Kubernetes, a ClusterIP service type creates an internal load balancer that e
 ### Nodeport ❌
 A Nodeport service opens the same port in all worker instances.
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/47bbb198-079e-4ca2-b2f0-9e1ba06b5eea)
+
 This approach works but it does not scale well because there is the need of using one port per service.
 
 ### Load balancer ❌
 A Load balancer service type creates an exernal load balancer with the necessary network configurations to connect it to all the worker nodes in the cluster
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/32a7ac66-b26a-42a0-9652-145fa0cd4715)
+
 This solution does not scale well because there is the need to create one load balancer per service and the implementation can be very costly.
 
 ### Ingress ✅
 An ingress type acts as a routing entry point to map different routes to services in the cluster. An ingress has to be implemented via an ingress controller: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/c8bc006f-b230-4886-a7de-c0a492398404)
+
 The controller can be of load balancer type because we can't create it due to lack of iam permissions. An alternative approach is to create this controller via a Nodeport service. The controller used in this case is a nginx ingress controller installed via a helm chart that can be found here: https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx
 
 ## Metric server and HPA
 Only hardware metrics were included (CPU and Memory), the metric server installed can be found here: https://github.com/kubernetes-sigs/metrics-server/blob/master/README.md
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/34b91a25-6d4d-4301-a2d4-629ea69b7677)
+
 Each microservice deployment has the following resource requests and limits:
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/0a7638a6-0dd5-437e-9513-1b8d375072ff)
+
 The paradigm of no CPU limits plus Memory requests = Memory limits is a widely used one and it can avoid problems like OOMErrors and peaks of CPU usage. More info here: 
 - CPU limits: https://home.robusta.dev/blog/stop-using-cpu-limits
 - Memory requests = limits: https://home.robusta.dev/blog/kubernetes-memory-limit
@@ -91,4 +97,5 @@ The paradigm of no CPU limits plus Memory requests = Memory limits is a widely u
 There is a pending issue with how Ubuntu resolves nameservers in order to reach external DNS names: https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/#known-issues
 
 ![imagen](https://github.com/FcoJesusDiaz/PlanTic-final-project/assets/72586746/57b82a2a-dd45-4219-a785-1b7636e55c8d)
+
 A workaround to this issue is to add up to 3 namservers in the kuberentes configmap used to configure the coredns service (the one that has to resolve external traffic).
