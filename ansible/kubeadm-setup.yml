@@ -23,17 +23,23 @@
           sudo cp -i /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
           sudo chown ubuntu:ubuntu /home/ubuntu/.kube/config
 
-    - name: Download tigera-operator.yaml
-      shell: curl -o tigera-operator.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+    #- name: Download tigera-operator.yaml
+    #  shell: curl -o tigera-operator.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+
+    - name: Download calico.yaml
+      shell: curl -o calico.yaml https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
 
     - name: Download custom-resources.yaml
       shell: curl -o custom-resources.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
     
-    - name: Apply tigera-operator.yaml
-      shell: kubectl create -f tigera-operator.yaml --kubeconfig /home/ubuntu/.kube/config
+    #- name: Apply tigera-operator.yaml
+    #  shell: kubectl create -f tigera-operator.yaml --kubeconfig /home/ubuntu/.kube/config
 
-    - name: Apply custom-resources.yaml
-      shell: kubectl create -f custom-resources.yaml --kubeconfig /home/ubuntu/.kube/config
+    - name: Apply calico.yaml
+      shell: kubectl create -f calico.yaml --kubeconfig /home/ubuntu/.kube/config
+
+    #- name: Apply custom-resources.yaml
+    #  shell: kubectl create -f custom-resources.yaml --kubeconfig /home/ubuntu/.kube/config
 
     - name: Download Helm
       shell:

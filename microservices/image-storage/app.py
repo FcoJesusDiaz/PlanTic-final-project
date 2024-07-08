@@ -3,6 +3,7 @@ from flask import Flask, flash, request, redirect, url_for, render_template
 #import urllib.request
 import os
 from werkzeug.utils import secure_filename
+import sys
 
 import boto3
  
@@ -25,7 +26,7 @@ def upload_file_to_s3(file, bucket_name, object_name=None):
     try:
         s3_client.upload_fileobj(file, bucket_name, object_name or file.filename)
     except Exception as e:
-        print(f"Error uploading file: {e}")
+        print(f"Error uploading file: {e}", file=sys.stderr)
         return False
     return True
 
@@ -62,6 +63,9 @@ def upload_image():
             flash('Image successfully uploaded and displayed below')
             presigned_url = create_presigned_url(os.environ['BUCKET_NAME'], filename)
             return render_template('index.html', filename=filename, image_url=presigned_url)
+        else:
+            flash('An error occurred when uploading the image')
+            return redirect(request.url)
     else:
         flash('Allowed image types are - png, jpg, jpeg, gif')
         return redirect(request.url)
